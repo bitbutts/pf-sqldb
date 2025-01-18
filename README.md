@@ -1,4 +1,4 @@
-# Database Structure Documentation
+# Database Structure Documentation of pft_transactions
 
 This document provides an overview of the SQL database structure, including table definitions, constraints, and indexes.
 
@@ -60,4 +60,48 @@ This document provides an overview of the SQL database structure, including tabl
    - The `NUMERIC(18, 6)` type for the `amount` column allows handling high-precision monetary values.
    - Using `BIGINT` for `ledger_index` ensures scalability for a large number of records.
 
+---
 
+## Script: Transaction Importer -> transaction_feed.py
+
+This section documents the Python script used to pull and process transactions from the XRPL network and insert them into the `pft_transactions` database table.
+
+### Overview
+The script connects to the XRPL JSON-RPC API to fetch transactions for a specific account and filters for token payments. The relevant data is then inserted into the `pft_transactions` table in a PostgreSQL database.
+
+### Configuration
+- **XRPL RPC URL**: URL of the XRPL JSON-RPC server (default: `https://s1.ripple.com:51234/`).
+- **Token Details**:
+  - `CURRENCY_CODE`: The token's currency code (e.g., `PFT`).
+  - `ISSUER_ADDRESS`: Address of the issuer for the token.
+- **Database**: Uses a PostgreSQL database hosted on Neon with SSL enabled.
+
+### Main Functions
+1. **`fetch_account_transactions`**: Fetches transactions from the XRPL API.
+2. **`is_token_payment`**: Filters transactions to check if they involve the specified token.
+3. **`decode_hex_or_base64` and `extract_memos`**: Decodes transaction memos (hex/base64 encoded).
+4. **`ripple_to_unix_time` and `get_ripple_datetime`**: Converts Ripple epoch time to standard Unix time.
+5. **`get_last_stored_ledger_index`**: Fetches the last processed ledger index from the database.
+6. **`insert_transaction`**: Inserts a transaction into the database with conflict handling.
+7. **`main`**: Orchestrates the process of fetching, filtering, and inserting transactions.
+
+### Database Insertion Logic
+- Inserts use the `ON CONFLICT DO NOTHING` strategy to avoid duplicate transactions.
+- Transactions are processed in batches for efficiency.
+
+### Requirements
+- Python 3.x
+- Libraries: `requests`, `json`, `psycopg2`, `base64`, `binascii`, `datetime`
+
+### How to Run
+1. Update the configuration section with your database connection string, token details, and other parameters.
+2. Execute the script with Python:
+   ```bash
+   python transaction_importer.py
+   ```
+   
+### Notes
+- Ensure the database table structure matches the one described in the `pft_transactions` table documentation.
+- Handle any potential API rate limits or errors from the XRPL server appropriately.
+
+---
