@@ -20,7 +20,7 @@ ACCOUNT_TO_CHECK = ISSUER_ADDRESS
 
 # Database connection details (update for your Neon setup):
 
-DB_CONN_STRING = "{{DB_CONNECT}}"
+DB_CONN_STRING = "postgres://your_neon_user:your_neon_password@your-neon-host.compute.aws.neon.tech:5432/your_neon_database?sslmode=require"
 
 # ------------------------------------------------------------------------------
 # Helpers to fetch and filter transactions
