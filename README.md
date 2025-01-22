@@ -74,7 +74,7 @@ The script connects to the XRPL JSON-RPC API to fetch transactions for a specifi
 - **Token Details**:
   - `CURRENCY_CODE`: The token's currency code (e.g., `PFT`).
   - `ISSUER_ADDRESS`: Address of the issuer for the token.
-- **Database**: Uses a PostgreSQL database hosted on Neon with SSL enabled.
+- **Database**: Uses a PostgreSQL database hosted on Neon with SSL enabled. Credentials get pulled with the `get_secrets` function.
 
 ### Main Functions
 1. **`get_secrets`**: Fetches the connection string for Neon from the AWS secrets manager.
@@ -97,10 +97,8 @@ The script connects to the XRPL JSON-RPC API to fetch transactions for a specifi
 
 ### How to Run
 1. Update the configuration section with your AWS secret name, token details, and other parameters.
-2. Execute the script with Python:
-   ```bash
-   python transaction_importer.py
-   ```
+2. Make sure to add lambda layers for `requests` and `psycopg2`
+3. Schedule
    
 ### Notes
 - Ensure the database table structure matches the one described in the `pft_transactions` table documentation.
