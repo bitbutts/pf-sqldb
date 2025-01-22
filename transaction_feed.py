@@ -5,6 +5,8 @@ import base64
 import binascii
 import datetime
 import psycopg2
+import boto3
+from botocore.exceptions import ClientError 
 
 # ------------------------------------------------------------------------------
 # Configuration
@@ -18,9 +20,39 @@ ISSUER_ADDRESS = "rnQUEEg8yyjrwk9FhyXpKavHyCRJM9BDMW"  # Replace with the actual
 # Which account to check transactions for:
 ACCOUNT_TO_CHECK = ISSUER_ADDRESS
 
-# Database connection details (update for your Neon setup):
+# ------------------------------------------------------------------------------
+# Get Neon secret from the AWS secret manager
+# ------------------------------------------------------------------------------
 
-DB_CONN_STRING = "postgres://your_neon_user:your_neon_password@your-neon-host.compute.aws.neon.tech:5432/your_neon_database?sslmode=require"
+def get_secret():
+    """
+    Retrieve the database connection string from AWS Secrets Manager.
+    """
+    secret_name = "__your_secret_name_goes_here__"
+    region_name = "us-east-1"
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='secretsmanager',
+        region_name=region_name
+    )
+
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+    except ClientError as e:
+        raise e
+
+    # Retrieve and return the secret string
+  
+    secret = json.loads(get_secret_value_response["SecretString"])
+
+        # Extract the DB_CONN_STRING key
+    conn_string = secret["DB_CONN_STRING"]
+    
+    return conn_string
 
 # ------------------------------------------------------------------------------
 # Helpers to fetch and filter transactions
@@ -187,8 +219,9 @@ def insert_transaction(
 # ------------------------------------------------------------------------------
 def main():
     # Connect to Neon
+    DB_CONN_STRING = get_secret()
     conn = psycopg2.connect(DB_CONN_STRING)
-    conn.autocommit = False  # or True if you want immediate commits
+    conn.autocommit = False
 
     # 1) Determine where to resume
     last_ledger_index = get_last_stored_ledger_index(conn)
