@@ -64,7 +64,7 @@ This document provides an overview of the SQL database structure, including tabl
 
 ## Script: Transaction Importer -> transaction_feed.py
 
-This section documents the Python script used to pull and process transactions from the XRPL network and insert them into the `pft_transactions` database table.
+This section documents the Python script used to pull and process transactions from the XRPL network and insert them into the `pft_transactions` database table. It's set to work as an AWS lambda function.
 
 ### Overview
 The script connects to the XRPL JSON-RPC API to fetch transactions for a specific account and filters for token payments. The relevant data is then inserted into the `pft_transactions` table in a PostgreSQL database.
@@ -77,6 +77,7 @@ The script connects to the XRPL JSON-RPC API to fetch transactions for a specifi
 - **Database**: Uses a PostgreSQL database hosted on Neon with SSL enabled.
 
 ### Main Functions
+1. **`get_secrets`**: Fetches the connection string for Neon from the AWS secrets manager.
 1. **`fetch_account_transactions`**: Fetches transactions from the XRPL API.
 2. **`is_token_payment`**: Filters transactions to check if they involve the specified token.
 3. **`decode_hex_or_base64` and `extract_memos`**: Decodes transaction memos (hex/base64 encoded).
@@ -92,9 +93,10 @@ The script connects to the XRPL JSON-RPC API to fetch transactions for a specifi
 ### Requirements
 - Python 3.x
 - Libraries: `requests`, `json`, `psycopg2`, `base64`, `binascii`, `datetime`
+- Lambda layers: `requests`, `psycopg2`
 
 ### How to Run
-1. Update the configuration section with your database connection string, token details, and other parameters.
+1. Update the configuration section with your AWS secret name, token details, and other parameters.
 2. Execute the script with Python:
    ```bash
    python transaction_importer.py
