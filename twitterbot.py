@@ -61,6 +61,8 @@ def create_tweet(initiations, tasks_completed, leaderboard_text, pft_sum):
         f"✨ {initiations} new initiations yesterday.\n"
         f"✅ {tasks_completed} tasks were completed.\n\n"
         f"🔥 Total PFT for Completed Tasks: {pft_sum}\n\n"
+        "🏆 Leaderboard for Yesterday:\n"
+        f"{leaderboard_text}\n\n"
     )
     
     # Twitter character limit is 280. Adjust formatting if necessary.
@@ -212,7 +214,7 @@ def lambda_handler(event, context):
 
     query2 = """
     SELECT
-        to_address AS user,
+        LEFT(to_address,4) AS user,
         COUNT(*) AS tasks_completed,
         ROUND(SUM(amount)) AS pft
     FROM pft_transactions
