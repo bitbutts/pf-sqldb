@@ -309,5 +309,4 @@ def main():
     print("Done.")
     print(f"Last processed ledger index this run: {highest_ledger_this_run}")
 
-if __name__ == "__main__":
-    main()
+
